@@ -1,0 +1,31 @@
+{
+  "name": "crypto-playground",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev:hash": "tsx src/hash.ts",
+    "dev:wallet": "tsx src/wallet-eth.ts",
+    "dev:balance": "tsx src/balance-eth.ts",
+    "dev:send": "tsx src/send-to-other.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@noble/curves": "^2.0.0",
+    "@noble/hashes": "^2.0.0",
+    "@scure/bip32": "^2.0.0",
+    "@scure/bip39": "^2.0.0",
+    "dotenv": "^17.2.2",
+    "viem": "^2.37.5"
+  },
+  "type": "module"
+}
