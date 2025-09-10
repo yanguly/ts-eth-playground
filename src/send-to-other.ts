@@ -7,7 +7,8 @@ const RPC = process.env.INFURA_SEPOLIA!;
 const PK = process.env.PRIVATE_KEY as `0x${string}`;
 const RECIPIENT = process.env.RECIPIENT as `0x${string}`;
 
-if (!RPC || !PK || !RECIPIENT) throw new Error('Missing INFURA_SEPOLIA or PRIVATE_KEY or RECIPIENT');
+if (!RPC || !PK || !RECIPIENT)
+  throw new Error('Missing INFURA_SEPOLIA or PRIVATE_KEY or RECIPIENT');
 
 const account = privateKeyToAccount(PK);
 
