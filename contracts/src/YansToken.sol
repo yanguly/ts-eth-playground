@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+
 contract YansToken is ERC20, ERC20Permit {
     constructor(string memory name_, string memory symbol_, uint256 initialSupply)
         ERC20(name_, symbol_) ERC20Permit(name_)
