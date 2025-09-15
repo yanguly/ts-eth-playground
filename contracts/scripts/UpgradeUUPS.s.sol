@@ -99,18 +99,18 @@ contract UpgradeUUPS is Script {
     function _upgradeProxy(address proxy, address newImpl, address signer) private {
         _beginAs(signer);
 
-        // Try upgradeTo first; fallback to upgradeToAndCall with empty data
+        // Prefer OZ v5 path first (upgradeToAndCall), fallback to upgradeTo if needed
         (bool ok,) = address(proxy).call(
-            abi.encodeWithSelector(IUUPS.upgradeTo.selector, newImpl)
+            abi.encodeWithSelector(IUUPS.upgradeToAndCall.selector, newImpl, bytes(""))
         );
         if (!ok) {
             (ok,) = address(proxy).call(
-                abi.encodeWithSelector(IUUPS.upgradeToAndCall.selector, newImpl, bytes(""))
+                abi.encodeWithSelector(IUUPS.upgradeTo.selector, newImpl)
             );
             require(ok, "upgrade reverted");
-            console2.log("upgradeToAndCall: OK");
-        } else {
             console2.log("upgradeTo: OK");
+        } else {
+            console2.log("upgradeToAndCall: OK");
         }
 
         _endAs();
