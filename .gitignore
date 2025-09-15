@@ -22,6 +22,7 @@ Thumbs.db
 contracts/lib/
 contracts/out/
 contracts/cache/
+contracts/broadcast/
 
 # VSCode
 .vscode/

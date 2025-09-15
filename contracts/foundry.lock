@@ -4,5 +4,11 @@
       "name": "v5.0.2",
       "rev": "dbb6104ce834628e473d2173bbc9d47f81a9eec3"
     }
+  },
+  "lib/openzeppelin-contracts-upgradeable": {
+    "tag": {
+      "name": "v5.4.0",
+      "rev": "e725abddf1e01cf05ace496e950fc8e243cc7cab"
+    }
   }
 }

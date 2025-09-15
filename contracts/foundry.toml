@@ -7,5 +7,6 @@ evm_version = "paris"
 optimizer = true
 optimizer_runs = 200
 remappings = [
-  "@openzeppelin/=lib/openzeppelin-contracts/"
+  "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+  "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
 ]
