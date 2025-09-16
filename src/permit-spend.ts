@@ -7,6 +7,7 @@ import {
   formatUnits,
   parseUnits,
   getAddress,
+  verifyTypedData,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
@@ -56,9 +57,15 @@ async function main() {
   const PERMIT_VALUE = BigInt(process.env.PERMIT_VALUE!);
   const PERMIT_DEADLINE = BigInt(process.env.PERMIT_DEADLINE!);
 
-  const [decimals, symbol] = await Promise.all([
+  const [decimals, symbol, nonce] = await Promise.all([
     publicClient.readContract({ address: TOKEN, abi, functionName: 'decimals' }),
     publicClient.readContract({ address: TOKEN, abi, functionName: 'symbol' }),
+    publicClient.readContract({
+      address: TOKEN,
+      abi: parseAbi(['function nonces(address) view returns (uint256)']),
+      functionName: 'nonces',
+      args: [OWNER],
+    }),
   ]);
 
   // Default recipient is the SPENDER; can be overridden via --to 0x...
@@ -66,6 +73,48 @@ async function main() {
 
   // Amount to transfer: default to full PERMIT_VALUE; can be overridden by a human-readable amount
   const valueToSpend = cli.amount ? parseUnits(cli.amount, Number(decimals)) : PERMIT_VALUE;
+
+  // Build EIP-712 domain/message to pre-verify the signature
+  const domain = {
+    name: await publicClient.readContract({
+      address: TOKEN,
+      abi: parseAbi(['function name() view returns (string)']),
+      functionName: 'name',
+    }),
+    version: '1',
+    chainId: sepolia.id,
+    verifyingContract: TOKEN,
+  } as const;
+  const types = {
+    Permit: [
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' },
+      { name: 'value', type: 'uint256' },
+      { name: 'nonce', type: 'uint256' },
+      { name: 'deadline', type: 'uint256' },
+    ],
+  } as const;
+  const message = {
+    owner: OWNER,
+    spender: spender.address,
+    value: BigInt(process.env.PERMIT_VALUE!),
+    nonce,
+    deadline: BigInt(process.env.PERMIT_DEADLINE!),
+  } as const;
+
+  const ok = await verifyTypedData({
+    address: OWNER,
+    domain,
+    types,
+    primaryType: 'Permit',
+    message,
+    signature: PERMIT_SIGNATURE,
+  });
+  if (!ok) {
+    throw new Error(
+      'Permit signature does not match current domain/message (check: value, deadline, nonce, spender).',
+    );
+  }
 
   // 1) Submit the permit (spender pays gas, owner pays nothing)
   const { v, r, s } = splitSig(PERMIT_SIGNATURE);
@@ -76,6 +125,19 @@ async function main() {
     args: [OWNER, spender.address, PERMIT_VALUE, PERMIT_DEADLINE, v, r, s],
   });
   console.log('permit tx:', tx1);
+  const receipt1 = await publicClient.waitForTransactionReceipt({ hash: tx1 });
+  if (receipt1.status !== 'success') throw new Error('Permit transaction reverted on-chain');
+
+  // Optional: read back allowance to avoid race conditions in estimation
+  const allowance = (await publicClient.readContract({
+    address: TOKEN,
+    abi: parseAbi(['function allowance(address owner,address spender) view returns (uint256)']),
+    functionName: 'allowance',
+    args: [OWNER, spender.address],
+  })) as bigint;
+  if (allowance < valueToSpend) {
+    throw new Error(`Allowance too low after permit. allowance=${allowance} need=${valueToSpend}`);
+  }
 
   // 2) Transfer tokens from OWNER to the recipient using the granted allowance
   const tx2 = await wallet.writeContract({
@@ -85,6 +147,8 @@ async function main() {
     args: [OWNER, to, valueToSpend],
   });
   console.log('transferFrom tx:', tx2);
+  const receipt2 = await publicClient.waitForTransactionReceipt({ hash: tx2 });
+  if (receipt2.status !== 'success') throw new Error('transferFrom transaction reverted on-chain');
 
   console.log(`✔ transferred ${formatUnits(valueToSpend, Number(decimals))} ${symbol} to ${to}`);
 }

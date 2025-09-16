@@ -44,6 +44,21 @@ Tips:
 - Ensure `IMPL_V2` (if provided) is a deployed contract on the target network: `cast code $IMPL_V2` should be non-empty.
 - Owner check: signer derived from `PRIVATE_KEY` must equal `owner()` of the proxy’s implementation.
 
+## Permit Flow (ERC‑2612)
+
+- Sign (owner): `npm run dev:permit:sign -- <amount> <minutes>`
+  - Copies `PERMIT_SIGNATURE`, `PERMIT_VALUE`, `PERMIT_DEADLINE` to `.env`.
+- Spend (spender): `npm run dev:permit:spend [-- <amount>]`
+  - Spender must have Sepolia ETH for gas.
+  - `SPENDER_ADDRESS` must match `SPENDER_PRIVATE_KEY`.
+- The spend script:
+  - Verifies the EIP‑712 signature off‑chain (domain, nonce, value, deadline)
+  - Waits for the permit receipt, reads allowance, then calls `transferFrom`
+- Common issues:
+  - Stale nonce or expired deadline → re‑sign
+  - Address/key mismatch → fix `.env`
+  - Wrong `TOKEN_ADDRESS` (must be the proxy) → fix `.env`
+
 ## Docs / References
 
 - UUPS upgradeable pattern (OpenZeppelin): https://docs.openzeppelin.com/contracts/5.x/upgradeable
@@ -51,6 +66,8 @@ Tips:
 - `ERC1967Proxy` (API): https://docs.openzeppelin.com/contracts/5.x/api/proxy#ERC1967Proxy
 - ERC‑20 (API): https://docs.openzeppelin.com/contracts/5.x/api/token/erc20#ERC20
 - ERC‑20 Permit (API): https://docs.openzeppelin.com/contracts/5.x/api/token/erc20#ERC20Permit
+- EIP‑2612 (ERC‑20 Permit): https://eips.ethereum.org/EIPS/eip-2612
+- EIP‑712 (Typed Structured Data): https://eips.ethereum.org/EIPS/eip-712
 - EIP‑1967 (proxy storage slots): https://eips.ethereum.org/EIPS/eip-1967
 - EIP‑1822 (UUPS proxiable UUID): https://eips.ethereum.org/EIPS/eip-1822
 - Foundry cheatcodes (overview): https://book.getfoundry.sh/cheatcodes

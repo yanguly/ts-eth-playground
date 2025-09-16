@@ -44,6 +44,39 @@ npm run dev:read       # read token data and balances
 npm run dev:transfer   # transfer tokens
 ```
 
+### ERC‑20 Permit (sign and spend)
+
+- Sign a permit (owner):
+  - Generates an EIP‑2612 signature authorizing a spender to spend your tokens without an on‑chain approve.
+  - Command:
+    - `npm run dev:permit:sign -- 2 60`  # 2 tokens, valid 60 minutes
+    - Copy printed values into `.env`: `PERMIT_SIGNATURE`, `PERMIT_VALUE`, `PERMIT_DEADLINE`.
+
+- Spend with the permit (spender):
+  - Spender submits the permit and then calls `transferFrom` using the granted allowance.
+  - Important: the spender account must have Sepolia ETH for gas.
+  - Ensure `.env`:
+    - `SPENDER_ADDRESS` matches `SPENDER_PRIVATE_KEY` (same account)
+    - `TOKEN_ADDRESS` is your proxy; `OWNER_ADDRESS` is the signer who created the permit
+  - Command:
+    - `npm run dev:permit:spend`          # spends full `PERMIT_VALUE`
+    - `npm run dev:permit:spend -- 1.25`  # spends a custom amount using the same permit
+
+Notes
+
+- The spend script pre‑verifies the EIP‑712 signature off‑chain, waits for the permit receipt, then reads back allowance before `transferFrom`.
+- If you see “gas required exceeds allowance (0)” or a revert in estimation:
+  - Re‑sign a fresh permit (nonce may have changed) and ensure the deadline is in the future
+  - Confirm the spender has ETH and `SPENDER_ADDRESS` matches `SPENDER_PRIVATE_KEY`
+- Ensure `TOKEN_ADDRESS` points to the proxy
+
+Docs
+- EIP‑712 (Typed Structured Data): https://eips.ethereum.org/EIPS/eip-712
+- EIP‑2612 (ERC‑20 Permit): https://eips.ethereum.org/EIPS/eip-2612
+- OpenZeppelin `ERC20Permit` (API): https://docs.openzeppelin.com/contracts/5.x/api/token/erc20#ERC20Permit
+- viem `verifyTypedData`: https://viem.sh/docs/utility/verifyTypedData
+- viem `writeContract`: https://viem.sh/docs/contract/writeContract
+
 ### Upgradeable ERC-20 (UUPS)
 
 - Deploy proxy + implementation via Foundry (env in your shell or pass with --env):
