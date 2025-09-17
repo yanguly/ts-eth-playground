@@ -77,6 +77,25 @@ Docs
 - viem `verifyTypedData`: https://viem.sh/docs/utility/verifyTypedData
 - viem `writeContract`: https://viem.sh/docs/contract/writeContract
 
+### Permit tools
+
+- Revoke permit (value = 0):
+  - `npm run dev:permit:revoke`          # 30 minutes TTL (deadline)
+  - `npm run dev:permit:revoke -- 90`    # 90 minutes TTL
+  - Submits using `SPENDER_PRIVATE_KEY` if set (relayer/spender submits), otherwise `OWNER_PRIVATE_KEY`.
+  - Verifies EIP‑712 off‑chain and waits for the on‑chain receipt.
+  - Docs: EIP‑2612 https://eips.ethereum.org/EIPS/eip-2612, EIP‑712 https://eips.ethereum.org/EIPS/eip-712
+
+### Allowance tools
+
+- Adjust allowance (increase/decrease/set):
+  - `npm run dev:allowance:adjust -- inc 1.5 [spender]`
+  - `npm run dev:allowance:adjust -- dec 0.75 [spender]`
+  - `npm run dev:allowance:adjust -- set 2.1 [spender]` (sets exact target)
+  - Tries `increaseAllowance/decreaseAllowance` first; if the token enforces zero‑first semantics, uses the fallback `approve(0)` → `approve(target)`.
+  - Note: fallback is two transactions (not atomic). The tool simulates both steps before sending and attempts a best‑effort restore if the second step fails.
+  - Extras: prints raw and human‑readable amounts, retries reads to avoid RPC lag; optional gas flags `--gas <gwei>` and `--priority <gwei>`.
+
 ### Upgradeable ERC-20 (UUPS)
 
 - Deploy proxy + implementation via Foundry (env in your shell or pass with --env):
