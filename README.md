@@ -150,3 +150,29 @@ npm run dev:read
 Testing (clean env helpers):
 - From `contracts/`: `make testv` (or `make testv-all` for per‑test isolation)  
 - More details in `contracts/README.md`
+## Upgrade validation (OpenZeppelin)
+
+Install once:
+
+```
+forge install OpenZeppelin/openzeppelin-foundry-upgrades --no-commit
+```
+
+Validate a new implementation before upgrading:
+
+```
+# set env
+export TOKEN_ADDRESS=<proxy>
+export IMPL_NEW=<new_implementation>
+export RPC=$INFURA_SEPOLIA
+export PK=$PRIVATE_KEY
+
+# dry-run validation (no tx)
+make validate
+```
+
+Run tests for runtime invariants:
+
+```
+forge test -vv
+```

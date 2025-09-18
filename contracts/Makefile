@@ -41,5 +41,16 @@ upgrade:
 	@[ -n "$(PK)" ] || (echo "PK not set. export PRIVATE_KEY or pass PK=<hex>" && exit 1)
 	TOKEN_ADDRESS= IMPL_V2=$$IMPL_V2 MINT_TO= MINT_AMOUNT= $(FORGE) script scripts/UpgradeUUPS.s.sol:UpgradeUUPS --rpc-url $(RPC) --private-key $(PK) --broadcast --skip-simulation -vv
 
+# Validate an upgrade (no on-chain tx)
+.PHONY: validate
+validate:
+	@[ -n "$(RPC)" ] || (echo "RPC not set (export INFURA_SEPOLIA or pass RPC=<url>)" && exit 1)
+	@[ -n "$(PK)" ] || (echo "PK not set (export PRIVATE_KEY or pass PK=<hex>)" && exit 1)
+	@[ -n "$(TOKEN_ADDRESS)" ] || (echo "TOKEN_ADDRESS not set" && exit 1)
+	@[ -n "$(IMPL_NEW)" ] || (echo "IMPL_NEW not set" && exit 1)
+	TOKEN_ADDRESS=$(TOKEN_ADDRESS) IMPL_NEW=$(IMPL_NEW) \
+	$(FORGE) script scripts/ValidateUpgrade.s.sol:ValidateUpgrade \
+		--rpc-url $(RPC) --private-key $(PK) -vv
+
 clean:
 	$(FORGE) clean
