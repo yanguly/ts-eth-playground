@@ -5,6 +5,8 @@ import {YansTokenUUPS} from "./YansTokenUUPS.sol";
 
 /**
  * V2: adds owner-only mint. Storage layout unchanged.
+ *
+ * @custom:oz-upgrades-from src/YansTokenUUPS.sol:YansTokenUUPS
  */
 contract YansTokenUUPSV2 is YansTokenUUPS {
     function mint(address to, uint256 amount) external onlyOwner {

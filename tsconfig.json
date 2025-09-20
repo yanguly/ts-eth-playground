@@ -14,10 +14,10 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Declarations & maps */
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "isolatedDeclarations": true,
+    "outDir": "dist",
+    "sourceMap": false,
+    "declaration": false,
+    "declarationMap": false,
 
     /* Interop & imports */
     "esModuleInterop": true,

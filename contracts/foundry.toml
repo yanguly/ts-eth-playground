@@ -6,7 +6,24 @@ solc_version = "0.8.30"
 evm_version = "paris"
 optimizer = true
 optimizer_runs = 200
+ast = true
+build_info = true
+extra_output = ["storageLayout"]
 remappings = [
   "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
   "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
 ]
+ignored_paths = [
+  "lib/**/certora/**",
+  "lib/**/test/**",
+  "lib/**/docs/**",
+  "src/YansToken.sol",
+]
+
+[[profile.default.fs_permissions]]
+access = "read"
+path = "out"
+
+[[profile.default.fs_permissions]]
+access = "read"
+path = "out-validate"

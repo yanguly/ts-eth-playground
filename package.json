@@ -16,7 +16,10 @@
     "dev:permit:sign": "tsx src/permit/sign-permit.ts",
     "dev:permit:revoke": "tsx src/permit/revoke-permit.ts",
     "dev:permit:spend": "tsx src/permit/permit-spend.ts",
+    "admin": "tsx src/admin-token.ts",
     "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."
@@ -40,7 +43,8 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.43.0"
+    "typescript-eslint": "^8.43.0",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@noble/curves": "^2.0.0",

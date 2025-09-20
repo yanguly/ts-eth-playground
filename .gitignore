@@ -21,6 +21,7 @@ Thumbs.db
 # Foundry
 contracts/lib/
 contracts/out/
+contracts/out-validate/
 contracts/cache/
 contracts/broadcast/
 
