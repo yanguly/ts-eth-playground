@@ -23,6 +23,17 @@ Alternatively, run directly with a scrubbed env:
 - `TOKEN_ADDRESS= IMPL_V2= forge test -vvv`
 - or temporarily unset variables: `env -u TOKEN_ADDRESS -u IMPL_V2 forge test`
 
+## Validating Upgrades
+
+- Command: `make validate`
+- Requires `NEW_IMPL_CONTRACT` and `REFERENCE_CONTRACT` (set in `.env` or passed inline).
+- The target:
+  - Builds with `FOUNDRY_PROFILE=validate` (tests ignored, build-info generated).
+  - Normalizes missing `src/` prefixes on artifacts.
+  - Runs `npx @openzeppelin/upgrades-core validate ... --requireReference` to check storage/layout safety.
+- Example override:
+  - `make validate NEW_IMPL_CONTRACT=YansTokenUUPSv3.sol:YansTokenUUPSV3 REFERENCE_CONTRACT=src/YansTokenUUPSv2.sol:YansTokenUUPSV2`
+
 ## Upgrade Script
 
 - Script: `scripts/UpgradeUUPS.s.sol:UpgradeUUPS`
