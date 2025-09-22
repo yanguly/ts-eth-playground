@@ -27,3 +27,17 @@ path = "out"
 [[profile.default.fs_permissions]]
 access = "read"
 path = "out-validate"
+
+[[profile.default.fs_permissions]]
+access = "read"
+path = "src"
+
+[profile.validate]
+inherits = "default"
+ignored_paths = [
+  "lib/**/certora/**",
+  "lib/**/test/**",
+  "lib/**/docs/**",
+  "src/YansToken.sol",
+  "test/**"
+]

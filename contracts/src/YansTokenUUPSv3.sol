@@ -8,7 +8,7 @@ pragma solidity ^0.8.30;
  * - Adds ERC20Burnable (holders can burn their tokens / allowance burnFrom).
  * - One-time reinitializer(3) to set roles after upgrade.
  *
- * @custom:oz-upgrades-from src/YansTokenUUPSV2.sol:YansTokenUUPSV2
+ * @custom:oz-upgrades-from src/YansTokenUUPSv2.sol:YansTokenUUPSV2
  */
 
 import {YansTokenUUPSV2} from './YansTokenUUPSV2.sol';

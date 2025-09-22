@@ -1,6 +1,7 @@
-FORGE?=forge
+FORGE?=$(shell command -v forge 2>/dev/null || echo ~/.foundry/bin/forge)
 RPC?=$(INFURA_SEPOLIA)
 PK?=$(PRIVATE_KEY)
+ENV_FILE?=../.env
 
 .PHONY: test testq testv clean
 
@@ -44,80 +45,19 @@ upgrade:
 # Validate an upgrade (no on-chain tx)
 .PHONY: validate
 validate:
-	@[ -n "$(RPC)" ] || (echo "RPC not set (export INFURA_SEPOLIA or pass RPC=<url>)" && exit 1)
-	@[ -n "$(PK)" ] || (echo "PK not set (export PRIVATE_KEY or pass PK=<hex>)" && exit 1)
-	@[ -n "$(TOKEN_ADDRESS)" ] || (echo "TOKEN_ADDRESS not set" && exit 1)
-	@[ -n "$(NEW_IMPL_CONTRACT)" ] || (echo "NEW_IMPL_CONTRACT not set (e.g. 'contracts/src/YansTokenUUPSV3.sol:YansTokenUUPSV3')" && exit 1)
-	# Hard clean to ensure no stale artifacts linger
-	rm -rf out cache
-	$(FORGE) clean
-	# Normalize artifact paths so they exist under out/src/<File>.sol/<Contract>.json
-	mkdir -p out/src/YansTokenUUPSv3.sol
-	[ -d out/YansTokenUUPSv3.sol ] && cp -R out/YansTokenUUPSv3.sol/* out/src/YansTokenUUPSv3.sol/ || true
-	mkdir -p out/src/YansTokenUUPSv2.sol
-	[ -d out/YansTokenUUPSv2.sol ] && cp -R out/YansTokenUUPSv2.sol/* out/src/YansTokenUUPSv2.sol/ || true
-	rm -rf out/build-info-pruned
-	mkdir -p out/build-info-pruned
-	# Prefer a build-info that looks like a full compilation (has input, output, solcVersion) and references v3
-	full=$$(for f in out/build-info/*.json; do \
-	  if grep -q '"solcVersion"' $$f && grep -q '"input"' $$f && grep -q '"output"' $$f; then \
-	    if grep -q 'src/YansTokenUUPSv3\.sol' $$f; then echo $$f; fi; \
-	  fi; \
-	done | head -1); \
-	if [ -z "$$full" ]; then \
-	  full=$$(for f in out/build-info/*.json; do \
-	    if grep -q '"solcVersion"' $$f && grep -q '"input"' $$f && grep -q '"output"' $$f; then echo $$f; fi; \
-	  done | head -1); \
-	fi; \
-	if [ -n "$$full" ]; then \
-	  cp "$$full" out/build-info-pruned/; \
-	else \
-	  largest=$$(ls -S out/build-info/*.json | head -1); \
-	  cp "$$largest" out/build-info-pruned/; \
-	fi; \
-	rm -rf out/build-info && mv out/build-info-pruned out/build-info
-	TOKEN_ADDRESS=$(TOKEN_ADDRESS) NEW_IMPL_CONTRACT=$(NEW_IMPL_CONTRACT) REFERENCE_CONTRACT=$(REFERENCE_CONTRACT) \
-	$(FORGE) script scripts/ValidateUpgrade.s.sol:ValidateUpgrade \
-		--rpc-url $(RPC) --private-key $(PK) --ffi --skip build -vv
-
-.PHONY: validate-out
-validate-out:
-	@[ -n "$(RPC)" ] || (echo "RPC not set (export INFURA_SEPOLIA or pass RPC=<url>)" && exit 1)
-	@[ -n "$(PK)" ] || (echo "PK not set (export PRIVATE_KEY or pass PK=<hex>)" && exit 1)
-	@[ -n "$(TOKEN_ADDRESS)" ] || (echo "TOKEN_ADDRESS not set" && exit 1)
-	@[ -n "$(NEW_IMPL_CONTRACT)" ] || (echo "NEW_IMPL_CONTRACT not set (e.g. 'src/YansTokenUUPSv3.sol:YansTokenUUPSV3')" && exit 1)
-	# Build into an isolated output directory
-	rm -rf out-validate
-	$(FORGE) clean
-	$(FORGE) build -q --out out-validate
-	# Normalize artifact paths under out-validate/src/
-	mkdir -p out-validate/src/YansTokenUUPSv3.sol
-	[ -d out-validate/YansTokenUUPSv3.sol ] && cp -R out-validate/YansTokenUUPSv3.sol/* out-validate/src/YansTokenUUPSv3.sol/ || true
-	mkdir -p out-validate/src/YansTokenUUPSv2.sol
-	[ -d out-validate/YansTokenUUPSv2.sol ] && cp -R out-validate/YansTokenUUPSv2.sol/* out-validate/src/YansTokenUUPSv2.sol/ || true
-	# Prune build-info to a single full-compilation JSON (prefer one referencing v3)
-	rm -rf out-validate/build-info-pruned
-	mkdir -p out-validate/build-info-pruned
-	full=$$(for f in out-validate/build-info/*.json; do \
-	  if grep -q '"solcVersion"' $$f && grep -q '"input"' $$f && grep -q '"output"' $$f; then \
-	    if grep -q 'src/YansTokenUUPSv3\.sol' $$f; then echo $$f; fi; \
-	  fi; \
-	done | head -1); \
-	if [ -z "$$full" ]; then \
-	  full=$$(for f in out-validate/build-info/*.json; do \
-	    if grep -q '"solcVersion"' $$f && grep -q '"input"' $$f && grep -q '"output"' $$f; then echo $$f; fi; \
-	  done | head -1); \
-	fi; \
-	if [ -n "$$full" ]; then \
-	  cp "$$full" out-validate/build-info-pruned/; \
-	else \
-	  largest=$$(ls -S out-validate/build-info/*.json | head -1); \
-	  cp "$$largest" out-validate/build-info-pruned/; \
-	fi; \
-	rm -rf out-validate/build-info && mv out-validate/build-info-pruned out-validate/build-info
-	FOUNDRY_OUT=out-validate TOKEN_ADDRESS=$(TOKEN_ADDRESS) NEW_IMPL_CONTRACT=$(NEW_IMPL_CONTRACT) REFERENCE_CONTRACT=$(REFERENCE_CONTRACT) \
-	$(FORGE) script scripts/ValidateUpgrade.s.sol:ValidateUpgrade \
-		--rpc-url $(RPC) --private-key $(PK) --ffi --skip build -vv
+	@[ -f $(ENV_FILE) ] || (echo "Env file not found: $(ENV_FILE)" && exit 1)
+	@set -a; . $(ENV_FILE); set +a; \
+	if [ -n "$(NEW_IMPL_CONTRACT)" ]; then export NEW_IMPL_CONTRACT="$(NEW_IMPL_CONTRACT)"; fi; \
+	if [ -n "$(REFERENCE_CONTRACT)" ]; then export REFERENCE_CONTRACT="$(REFERENCE_CONTRACT)"; fi; \
+	if [ -z "$$NEW_IMPL_CONTRACT" ]; then echo "Missing NEW_IMPL_CONTRACT. Set it in $(ENV_FILE) or pass NEW_IMPL_CONTRACT=<artifact>"; exit 1; fi; \
+	if [ -z "$$REFERENCE_CONTRACT" ]; then echo "Missing REFERENCE_CONTRACT. Set it in $(ENV_FILE) or pass REFERENCE_CONTRACT=<artifact>"; exit 1; fi; \
+	FOUNDRY_PROFILE=validate $(FORGE) clean && \
+	FOUNDRY_PROFILE=validate $(FORGE) build --build-info --skip test && \
+	NEW_FQN=$$NEW_IMPL_CONTRACT; \
+	REF_FQN=$$REFERENCE_CONTRACT; \
+	case $$NEW_FQN in */*) ;; *) NEW_FQN="src/$$NEW_FQN";; esac; \
+	case $$REF_FQN in */*) ;; *) REF_FQN="src/$$REF_FQN";; esac; \
+	npx @openzeppelin/upgrades-core@1.37.0 validate out/build-info --contract "$$NEW_FQN" --reference "$$REF_FQN" --requireReference
 
 clean:
 	$(FORGE) clean
