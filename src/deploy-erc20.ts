@@ -4,9 +4,9 @@ import { createPublicClient, createWalletClient, http } from 'viem';
 import { sepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 
-const RPC = process.env.INFURA_SEPOLIA!;
+const RPC = process.env.NETWORK_RPC_URL!;
 const PK = process.env.PRIVATE_KEY as `0x${string}`;
-if (!RPC || !PK) throw new Error('Missing INFURA_SEPOLIA or PRIVATE_KEY in .env');
+if (!RPC || !PK) throw new Error('Missing NETWORK_RPC_URL or PRIVATE_KEY in .env');
 
 (async () => {
   const artifactRaw = await readFile('contracts/out/YansToken.sol/YansToken.json', 'utf8');

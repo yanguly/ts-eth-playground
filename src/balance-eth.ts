@@ -2,10 +2,10 @@ import 'dotenv/config';
 import { createPublicClient, http, formatEther } from 'viem';
 import { sepolia } from 'viem/chains';
 
-const RPC = process.env.INFURA_SEPOLIA!;
+const RPC = process.env.NETWORK_RPC_URL!;
 const ADDRESS = process.env.MY_ADDRESS as `0x${string}`;
 
-if (!RPC || !ADDRESS) throw new Error('Missing INFURA_SEPOLIA or MY_ADDRESS in .env');
+if (!RPC || !ADDRESS) throw new Error('Missing NETWORK_RPC_URL or MY_ADDRESS in .env');
 
 const client = createPublicClient({ chain: sepolia, transport: http(RPC) });
 

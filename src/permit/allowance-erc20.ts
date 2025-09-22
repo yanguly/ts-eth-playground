@@ -25,7 +25,7 @@ function requireEnv(name: string): string {
 
 const cli = parseCli(process.argv);
 
-const RPC = requireEnv('INFURA_SEPOLIA');
+const RPC = requireEnv('NETWORK_RPC_URL');
 const TOKEN_ADDRESS = (cli.token ?? requireEnv('TOKEN_ADDRESS')) as `0x${string}`;
 const OWNER_ADDRESS = (cli.owner ?? requireEnv('OWNER_ADDRESS')) as `0x${string}`;
 const SPENDER_ADDRESS = (cli.spender ?? requireEnv('SPENDER_ADDRESS')) as `0x${string}`;

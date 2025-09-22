@@ -4,7 +4,7 @@ import { sepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 
 // Env
-const RPC = process.env.INFURA_SEPOLIA!;
+const RPC = process.env.NETWORK_RPC_URL!;
 const PK = process.env.PRIVATE_KEY as `0x${string}`;
 const TOKEN = process.env.TOKEN_ADDRESS as `0x${string}`; // proxy address
 const TO = process.env.MINT_TO as `0x${string}`;
@@ -13,7 +13,7 @@ const AMOUNT_WEI = process.env.MINT_AMOUNT_WEI; // raw wei (optional override)
 
 if (!RPC || !PK || !TOKEN || !TO || (!AMOUNT && !AMOUNT_WEI)) {
   throw new Error(
-    'Missing env: INFURA_SEPOLIA, PRIVATE_KEY, TOKEN_ADDRESS, MINT_TO, (MINT_AMOUNT | MINT_AMOUNT_WEI)',
+    'Missing env: NETWORK_RPC_URL, PRIVATE_KEY, TOKEN_ADDRESS, MINT_TO, (MINT_AMOUNT | MINT_AMOUNT_WEI)',
   );
 }
 

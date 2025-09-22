@@ -3,13 +3,13 @@ import { createWalletClient, createPublicClient, http, parseUnits } from 'viem';
 import { sepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 
-const RPC = process.env.INFURA_SEPOLIA!;
+const RPC = process.env.NETWORK_RPC_URL!;
 const PK = process.env.PRIVATE_KEY as `0x${string}`;
 const TOKEN = process.env.TOKEN_ADDRESS as `0x${string}`;
 const RECIPIENT = process.env.RECIPIENT as `0x${string}`;
 
 if (!RPC || !PK || !TOKEN || !RECIPIENT) {
-  throw new Error('Missing env vars: INFURA_SEPOLIA, PRIVATE_KEY, TOKEN_ADDRESS, RECIPIENT');
+  throw new Error('Missing env vars: NETWORK_RPC_URL, PRIVATE_KEY, TOKEN_ADDRESS, RECIPIENT');
 }
 
 const erc20TransferAbi = [

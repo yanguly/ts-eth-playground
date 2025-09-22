@@ -213,7 +213,7 @@ export async function cmdBurnFrom(ctx: Ctx, owner?: Address, amountStr?: string)
 }
 
 async function main() {
-  const RPC = env('INFURA_SEPOLIA');
+  const RPC = env('NETWORK_RPC_URL');
   const TOKEN = env('TOKEN_ADDRESS') as `0x${string}`;
   const PK = env('PRIVATE_KEY') as `0x${string}`;
 

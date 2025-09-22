@@ -12,7 +12,7 @@ pragma solidity ^0.8.30;
  *
  * Run:
  * forge script scripts/DeployUUPS.s.sol:DeployUUPS \
- *   --rpc-url $INFURA_SEPOLIA \
+ *   --rpc-url $NETWORK_RPC_URL \
  *   --private-key $DEPLOYER_PK \
  *   --broadcast -vv
  */

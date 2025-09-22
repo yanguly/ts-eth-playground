@@ -2,11 +2,11 @@ import 'dotenv/config';
 import { createPublicClient, http, formatUnits } from 'viem';
 import { sepolia } from 'viem/chains';
 
-const RPC = process.env.INFURA_SEPOLIA!;
+const RPC = process.env.NETWORK_RPC_URL!;
 const TOKEN = process.env.TOKEN_ADDRESS as `0x${string}`;
 const HOLDER = process.env.MY_ADDRESS as `0x${string}`;
 if (!RPC || !TOKEN || !HOLDER)
-  throw new Error('Missing INFURA_SEPOLIA or TOKEN_ADDRESS or MY_ADDRESS');
+  throw new Error('Missing NETWORK_RPC_URL or TOKEN_ADDRESS or MY_ADDRESS');
 
 const erc20Abi = [
   {

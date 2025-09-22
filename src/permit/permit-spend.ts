@@ -12,7 +12,7 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
 
-const RPC = process.env.INFURA_SEPOLIA!;
+const RPC = process.env.NETWORK_RPC_URL!;
 const TOKEN = process.env.TOKEN_ADDRESS as `0x${string}`;
 const OWNER = process.env.OWNER_ADDRESS as `0x${string}`;
 const SPENDER_PK = process.env.SPENDER_PRIVATE_KEY!.replace(/^0x/, '');

@@ -8,7 +8,7 @@
  * - Prints allowance before and after the change.
  *
  * Env
- * - INFURA_SEPOLIA: RPC URL (Sepolia)
+ * - NETWORK_RPC_URL: RPC URL (Sepolia)
  * - TOKEN_ADDRESS:  ERC‑20 token (proxy) address
  * - OWNER_PRIVATE_KEY: private key of the token owner (0x‑hex)
  * - SPENDER_ADDRESS: default spender address (CLI can override)
@@ -36,7 +36,7 @@ import {
 import { sepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 
-const RPC = process.env.INFURA_SEPOLIA!;
+const RPC = process.env.NETWORK_RPC_URL!;
 const TOKEN = process.env.TOKEN_ADDRESS as `0x${string}`;
 const OWNER_PK = (process.env.OWNER_PRIVATE_KEY as string).replace(/^0x/, '');
 const DEFAULT_SPENDER = process.env.SPENDER_ADDRESS as `0x${string}`;

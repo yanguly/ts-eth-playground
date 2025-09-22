@@ -164,7 +164,7 @@ Validate a new implementation before upgrading:
 # set env
 export TOKEN_ADDRESS=<proxy>
 export IMPL_NEW=<new_implementation>
-export RPC=$INFURA_SEPOLIA
+export RPC=$NETWORK_RPC_URL
 export PK=$PRIVATE_KEY
 
 # dry-run validation (no tx)

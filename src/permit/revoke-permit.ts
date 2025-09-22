@@ -8,7 +8,7 @@
  * - Submits the permit using a sender wallet (spender/relayer if provided, otherwise owner).
  *
  * Env
- * - INFURA_SEPOLIA: RPC URL (Sepolia)
+ * - NETWORK_RPC_URL: RPC URL (Sepolia)
  * - TOKEN_ADDRESS:  ERC‑20 token (proxy) address
  * - OWNER_ADDRESS / OWNER_PRIVATE_KEY: owner of the tokens
  * - SPENDER_ADDRESS: spender to revoke
@@ -32,7 +32,7 @@ function envOrThrow(name: string): string {
   return v.trim();
 }
 
-const RPC = envOrThrow('INFURA_SEPOLIA');
+const RPC = envOrThrow('NETWORK_RPC_URL');
 const TOKEN = envOrThrow('TOKEN_ADDRESS') as `0x${string}`;
 const OWNER = envOrThrow('OWNER_ADDRESS') as `0x${string}`;
 const OWNER_PK = envOrThrow('OWNER_PRIVATE_KEY').replace(/^0x/, '');

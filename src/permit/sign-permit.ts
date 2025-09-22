@@ -4,7 +4,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
 import { signTypedData } from 'viem/actions';
 
-const RPC = process.env.INFURA_SEPOLIA!;
+const RPC = process.env.NETWORK_RPC_URL!;
 const TOKEN = process.env.TOKEN_ADDRESS as `0x${string}`;
 const OWNER = process.env.OWNER_ADDRESS as `0x${string}`;
 const OWNER_PK = process.env.OWNER_PRIVATE_KEY!.replace(/^0x/, '');
