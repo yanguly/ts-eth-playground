@@ -4,7 +4,7 @@ pragma solidity ^0.8.30;
 import {Test} from "forge-std/Test.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {YansTokenUUPS} from "../src/YansTokenUUPS.sol";
-import {YansTokenUUPSV2} from "../src/YansTokenUUPSV2.sol";
+import {YansTokenUUPSV3} from "../src/YansTokenUUPSV3.sol";
 import {UpgradeUUPS} from "../scripts/UpgradeUUPS.s.sol";
 
 contract UpgradeUUPSScriptTest is Test {
@@ -27,27 +27,27 @@ contract UpgradeUUPSScriptTest is Test {
             sA.run();
         }
 
-        // B) Fallback deploy of V2 + mint
+        // B) Fallback deploy of 3 + mint
         {
             address proxyB = _deployProxyOwnedBy(signer);
             vm.setEnv("TOKEN_ADDRESS", vm.toString(proxyB));
             vm.setEnv("PRIVATE_KEY", vm.toString(TEST_PK));
-            vm.setEnv("IMPL_V2", "0x"); // invalid -> deploy V2
+            vm.setEnv("IMPL_NEW", "0x"); // invalid -> deploy NEW
             vm.setEnv("MINT_TO", vm.toString(address(0xCAFE)));
             vm.setEnv("MINT_AMOUNT", vm.toString(uint256(123e18)));
             new UpgradeUUPS().run();
             address implB = _impl(proxyB);
-            assertEq(YansTokenUUPSV2(implB).proxiableUUID(), SLOT);
+            assertEq(YansTokenUUPSV3(implB).proxiableUUID(), SLOT);
             assertEq(YansTokenUUPS(proxyB).balanceOf(address(0xCAFE)), 123e18);
         }
 
-        // C) Uses env-provided V2 + mint
+        // C) Uses env-provided V3 + mint
         {
             address proxyC = _deployProxyOwnedBy(signer);
-            address implC = address(new YansTokenUUPSV2());
+            address implC = address(new YansTokenUUPSV3());
             vm.setEnv("TOKEN_ADDRESS", vm.toString(proxyC));
             vm.setEnv("PRIVATE_KEY", vm.toString(TEST_PK));
-            vm.setEnv("IMPL_V2", vm.toString(implC));
+            vm.setEnv("IMPL_NEW", vm.toString(implC));
             vm.setEnv("MINT_TO", vm.toString(address(0xCAFE)));
             vm.setEnv("MINT_AMOUNT", vm.toString(uint256(123e18)));
             new UpgradeUUPS().run();

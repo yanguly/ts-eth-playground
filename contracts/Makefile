@@ -63,5 +63,15 @@ validate:
 	case $$REF_FQN in */*) ;; *) REF_FQN="src/$$REF_FQN";; esac; \
 	npx @openzeppelin/upgrades-core@1.37.0 validate out/build-info --contract "$$NEW_FQN" --reference "$$REF_FQN" --requireReference
 
+layout:
+	@echo "Building with build-info…"
+	FOUNDRY_PROFILE=validate $(FORGE) clean
+	FOUNDRY_PROFILE=validate $(FORGE) build --build-info --skip test
+	@echo "Validating with OpenZeppelin upgrades-core…"
+	npx -y @openzeppelin/upgrades-core@1.37.0 validate out/build-info \
+	  --contract "$(NEW_IMPL_CONTRACT)" \
+	  --reference "$(REFERENCE_CONTRACT)" \
+	  --requireReference
+
 clean:
 	$(FORGE) clean

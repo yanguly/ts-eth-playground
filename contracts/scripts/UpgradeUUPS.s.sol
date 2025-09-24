@@ -2,7 +2,7 @@
 pragma solidity ^0.8.30;
 
 import 'forge-std/Script.sol';
-import {YansTokenUUPSV2} from '../src/YansTokenUUPSV2.sol';
+import {YansTokenUUPSV3} from '../src/YansTokenUUPSV3.sol';
 
 // --- Minimal interfaces ---
 interface IUUPS {
@@ -84,7 +84,7 @@ contract UpgradeUUPS is Script {
       console2.log('Using IMPL_NEW from env:', impl);
     } catch {
       _beginAs(signer);
-      impl = address(new YansTokenUUPSV2()); // или V3, если сейчас катаешь V3
+      impl = address(new YansTokenUUPSV3()); // Or v4, v5, v6
       _endAs();
       console2.log('Deployed IMPL_NEW:', impl);
     }
