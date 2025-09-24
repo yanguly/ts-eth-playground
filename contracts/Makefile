@@ -35,7 +35,7 @@ deploy:
 	@[ -n "$(PK)" ] || (echo "PK not set. export PRIVATE_KEY or pass PK=<hex>" && exit 1)
 	$(FORGE) script scripts/DeployUUPS.s.sol:DeployUUPS --rpc-url $(RPC) --private-key $(PK) --broadcast -vv
 
-# Upgrade UUPS (prefers upgradeToAndCall; IMPL_V2 optional via env)
+# Upgrade UUPS (prefers upgradeToAndCall; IMPL_NEW optional via env)
 .PHONY: upgrade
 upgrade:
 	@[ -n "$(RPC)" ] || (echo "RPC not set"; exit 1)
