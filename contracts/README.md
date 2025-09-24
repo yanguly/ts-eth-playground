@@ -25,7 +25,6 @@ Alternatively, run directly with a scrubbed env:
 
 ## Validating Upgrades
 
-- Command: `make validate`
 - Requires `NEW_IMPL_CONTRACT` and `REFERENCE_CONTRACT` (set in `.env` or passed inline).
 - The target:
   - Builds with `FOUNDRY_PROFILE=validate` (tests ignored, build-info generated).
@@ -39,20 +38,19 @@ Alternatively, run directly with a scrubbed env:
 - Script: `scripts/UpgradeUUPS.s.sol:UpgradeUUPS`
 - Required env:
   - `TOKEN_ADDRESS` — proxy address (string)
-  - `PRIVATE_KEY`  — 0x-prefixed 32-byte hex
-  - Optional: `IMPL_V2` — implementation address; if omitted/invalid, the script deploys V2
-  - Optional: `MINT_TO`, `MINT_AMOUNT` — triggers post-upgrade mint
+  - `PRIVATE_KEY`  — 0x-prefixed 32-byte hex (controls the upgrade)
+  - Optional: `IMPL_NEW` — implementation address; if omitted/invalid, the script deploys the latest contract
 
 Running examples:
 - Simulate only:
-  - `forge script scripts/UpgradeUUPS.s.sol:UpgradeUUPS --rpc-url $RPC --private-key $PK`
+  - `forge script scripts/UpgradeUUPS.s.sol:UpgradeUUPS --rpc-url $NETWORK_RPC_URL --private-key $PRIVATE_KEY`
   - Note: On OZ v5, `upgradeTo` reverts and the script falls back to `upgradeToAndCall`.
     Some Foundry setups mark the initial revert as a failed simulation even if the fallback succeeds.
 - Broadcast (skips simulation):
-  - `forge script scripts/UpgradeUUPS.s.sol:UpgradeUUPS --rpc-url $RPC --private-key $PK --broadcast --skip-simulation`
+  - `forge script scripts/UpgradeUUPS.s.sol:UpgradeUUPS --rpc-url $NETWORK_RPC_URL --private-key $PRIVATE_KEY --broadcast --skip-simulation`
 
 Tips:
-- Ensure `IMPL_V2` (if provided) is a deployed contract on the target network: `cast code $IMPL_V2` should be non-empty.
+- Ensure `IMPL_NEW` (if provided) is deployed on the target network: `cast code $IMPL_NEW` should be non-empty.
 - Owner check: signer derived from `PRIVATE_KEY` must equal `owner()` of the proxy’s implementation.
 
 ## Permit Flow (ERC‑2612)

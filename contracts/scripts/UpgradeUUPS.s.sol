@@ -11,9 +11,8 @@ interface IUUPS {
   function proxiableUUID() external view returns (bytes32);
 }
 
-interface IERC20Like {
+interface IERC20Ownable {
   function owner() external view returns (address);
-  function mint(address to, uint256 amount) external;
 }
 
 contract UpgradeUUPS is Script {
@@ -25,8 +24,6 @@ contract UpgradeUUPS is Script {
   string private constant ENV_TOKEN_ADDRESS = 'TOKEN_ADDRESS';
   string private constant ENV_PRIVATE_KEY = 'PRIVATE_KEY';
   string private constant ENV_IMPL_NEW = 'IMPL_NEW';
-  string private constant ENV_MINT_TO = 'MINT_TO';
-  string private constant ENV_MINT_AMOUNT = 'MINT_AMOUNT';
 
   function run() external {
     // Inputs
@@ -57,8 +54,7 @@ contract UpgradeUUPS is Script {
     console2.log('Impl(after):', implAfter);
     require(implAfter == implV2, 'Implementation not updated');
 
-    // Optional post-upgrade mint
-    _maybeMint(proxy, signer);
+    console2.log('Upgrade complete');
   }
 
   // --- Orchestration helpers ---
@@ -73,7 +69,7 @@ contract UpgradeUUPS is Script {
   }
 
   function _assertSignerIsOwner(address proxy, address signer) private view {
-    address owner = IERC20Like(proxy).owner();
+    address owner = IERC20Ownable(proxy).owner();
     console2.log('Owner:', owner);
     require(signer == owner, 'Signer is not owner');
   }
@@ -112,17 +108,6 @@ contract UpgradeUUPS is Script {
     _endAs();
   }
 
-  function _maybeMint(address proxy, address signer) private {
-    (bool hasTo, address to) = _envAddressOptional(ENV_MINT_TO);
-    (bool hasAmt, uint256 amount) = _envUintOptional(ENV_MINT_AMOUNT);
-    if (!(hasTo && hasAmt)) return;
-
-    _beginAs(signer);
-    IERC20Like(proxy).mint(to, amount);
-    _endAs();
-    console2.log('Minted (raw):', amount, 'to:', to);
-  }
-
   // Use broadcast in script context; fallback to prank in test context.
   function _beginAs(address signer) private {
     try vm.startBroadcast(signer) {} catch {
@@ -141,19 +126,4 @@ contract UpgradeUUPS is Script {
     impl = address(uint160(uint256(word)));
   }
 
-  function _envAddressOptional(string memory key) private view returns (bool ok, address a) {
-    try vm.envAddress(key) returns (address v) {
-      return (true, v);
-    } catch {
-      return (false, address(0));
-    }
-  }
-
-  function _envUintOptional(string memory key) private view returns (bool ok, uint256 v) {
-    try vm.envUint(key) returns (uint256 n) {
-      return (true, n);
-    } catch {
-      return (false, 0);
-    }
-  }
 }

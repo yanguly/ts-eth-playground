@@ -42,6 +42,8 @@ npm run dev:send       # send ETH transaction
 npm run dev:deploy     # deploy ERC-20 token
 npm run dev:read       # read token data and balances
 npm run dev:transfer   # transfer tokens
+npm run dev:mint -- --to 0x... --amount 100   # owner-only mint (or pass --amount-wei)
+  # Flags override env vars (MINT_TO / MINT_AMOUNT / MINT_AMOUNT_WEI)
 ```
 
 ### ERC‑20 Permit (sign and spend)
@@ -103,7 +105,7 @@ Docs
 ```bash
 cd contracts
 forge script scripts/DeployUUPS.s.sol:DeployUUPS \
-  --rpc-url $RPC --private-key $PK --broadcast -vv
+  --rpc-url $NETWORK_RPC_URL --private-key $PRIVATE_KEY --broadcast -vv
 
 # Required env for deploy:
 # TOKEN_NAME, TOKEN_SYMBOL, INITIAL_RECIPIENT, INITIAL_SUPPLY
@@ -114,10 +116,10 @@ forge script scripts/DeployUUPS.s.sol:DeployUUPS \
 ```bash
 cd contracts
 forge script scripts/UpgradeUUPS.s.sol:UpgradeUUPS \
-  --rpc-url $RPC --private-key $PK --broadcast --skip-simulation -vv
+  --rpc-url $NETWORK_RPC_URL --private-key $PRIVATE_KEY --broadcast --skip-simulation -vv
 
 # Required env: TOKEN_ADDRESS, PRIVATE_KEY
-# Optional: IMPL_V2 (impl address), MINT_TO, MINT_AMOUNT
+# Optional: IMPL_NEW (impl address)
 ```
 
 ## Example
@@ -164,8 +166,8 @@ Validate a new implementation before upgrading:
 # set env
 export TOKEN_ADDRESS=<proxy>
 export IMPL_NEW=<new_implementation>
-export RPC=$NETWORK_RPC_URL
-export PK=$PRIVATE_KEY
+export NETWORK_RPC_URL=<rpc>
+export PRIVATE_KEY=<signer_private_key>
 
 # dry-run validation (no tx)
 make validate

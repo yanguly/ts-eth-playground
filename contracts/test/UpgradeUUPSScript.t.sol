@@ -27,34 +27,28 @@ contract UpgradeUUPSScriptTest is Test {
       sA.run();
     }
 
-    // B) Fallback deploy of 3 + mint
-    {
-      address proxyB = _deployProxyOwnedBy(signer);
-      vm.setEnv('TOKEN_ADDRESS', vm.toString(proxyB));
-      vm.setEnv('PRIVATE_KEY', vm.toString(TEST_PK));
-      vm.setEnv('IMPL_NEW', '0x'); // invalid -> deploy NEW
-      vm.setEnv('MINT_TO', vm.toString(address(0xCAFE)));
-      vm.setEnv('MINT_AMOUNT', vm.toString(uint256(123e18)));
-      new UpgradeUUPS().run();
-      address implB = _impl(proxyB);
-      assertEq(YansTokenUUPSV3(implB).proxiableUUID(), SLOT);
-      assertEq(YansTokenUUPS(proxyB).balanceOf(address(0xCAFE)), 123e18);
-    }
+        // B) Fallback deploy of V3 implementation
+        {
+            address proxyB = _deployProxyOwnedBy(signer);
+            vm.setEnv('TOKEN_ADDRESS', vm.toString(proxyB));
+            vm.setEnv('PRIVATE_KEY', vm.toString(TEST_PK));
+            vm.setEnv('IMPL_NEW', '0x'); // invalid -> deploy NEW
+            new UpgradeUUPS().run();
+            address implB = _impl(proxyB);
+            assertEq(YansTokenUUPSV3(implB).proxiableUUID(), SLOT);
+        }
 
-    // C) Uses env-provided V3 + mint
-    {
-      address proxyC = _deployProxyOwnedBy(signer);
-      address implC = address(new YansTokenUUPSV3());
-      vm.setEnv('TOKEN_ADDRESS', vm.toString(proxyC));
-      vm.setEnv('PRIVATE_KEY', vm.toString(TEST_PK));
-      vm.setEnv('IMPL_NEW', vm.toString(implC));
-      vm.setEnv('MINT_TO', vm.toString(address(0xCAFE)));
-      vm.setEnv('MINT_AMOUNT', vm.toString(uint256(123e18)));
-      new UpgradeUUPS().run();
-      assertEq(_impl(proxyC), implC);
-      assertEq(YansTokenUUPS(proxyC).balanceOf(address(0xCAFE)), 123e18);
+        // C) Uses env-provided implementation
+        {
+            address proxyC = _deployProxyOwnedBy(signer);
+            address implC = address(new YansTokenUUPSV3());
+            vm.setEnv('TOKEN_ADDRESS', vm.toString(proxyC));
+            vm.setEnv('PRIVATE_KEY', vm.toString(TEST_PK));
+            vm.setEnv('IMPL_NEW', vm.toString(implC));
+            new UpgradeUUPS().run();
+            assertEq(_impl(proxyC), implC);
+        }
     }
-  }
 
   function _deployProxyOwnedBy(address owner_) private returns (address proxyAddr) {
     YansTokenUUPS implV1 = new YansTokenUUPS();
