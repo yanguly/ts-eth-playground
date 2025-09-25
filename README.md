@@ -44,6 +44,8 @@ npm run dev:read       # read token data and balances
 npm run dev:transfer   # transfer tokens
 npm run dev:mint -- --to 0x... --amount 100   # owner-only mint (or pass --amount-wei)
   # Flags override env vars (MINT_TO / MINT_AMOUNT / MINT_AMOUNT_WEI)
+npm run dev:roles -- grant --role pauser --to 0x...   # manage AccessControl roles
+npm run dev:roles -- revoke --role pauser --to 0x...   # manage AccessControl roles
 ```
 
 ### ERC‑20 Permit (sign and spend)
@@ -97,6 +99,13 @@ Docs
   - Tries `increaseAllowance/decreaseAllowance` first; if the token enforces zero‑first semantics, uses the fallback `approve(0)` → `approve(target)`.
   - Note: fallback is two transactions (not atomic). The tool simulates both steps before sending and attempts a best‑effort restore if the second step fails.
   - Extras: prints raw and human‑readable amounts, retries reads to avoid RPC lag; optional gas flags `--gas <gwei>` and `--priority <gwei>`.
+
+### Role management (AccessControl)
+
+- Grant role: `npm run dev:roles -- grant --role pauser --to 0xTarget`
+- Revoke role: `npm run dev:roles -- revoke --role 0xRoleHash --to 0xTarget`
+- Supported role shorthands: `pauser`, `admin` (`default-admin`).
+- Flags override env; requires `NETWORK_RPC_URL`, `PRIVATE_KEY`, `TOKEN_ADDRESS` for the token being managed.
 
 ### Upgradeable ERC-20 (UUPS)
 

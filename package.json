@@ -11,6 +11,7 @@
     "dev:read": "tsx src/read-erc20.ts",
     "dev:transfer": "tsx src/transfer-erc20.ts",
     "dev:mint": "tsx src/mint-erc20.ts",
+    "dev:roles": "tsx src/roles-manage.ts",
     "dev:allowance": "tsx src/permit/allowance-erc20.ts",
     "dev:allowance:adjust": "tsx src/permit/allowance-adjust.ts",
     "dev:permit:sign": "tsx src/permit/sign-permit.ts",
