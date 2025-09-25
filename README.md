@@ -44,6 +44,7 @@ npm run dev:read       # read token data and balances
 npm run dev:transfer   # transfer tokens
 npm run dev:mint -- --to 0x... --amount 100   # owner-only mint (or pass --amount-wei)
   # Flags override env vars (MINT_TO / MINT_AMOUNT / MINT_AMOUNT_WEI)
+npm run dev:init-v3 -- --admin 0x...   # run once after upgrading to V3
 npm run dev:roles -- grant --role pauser --to 0x...   # manage AccessControl roles
 npm run dev:roles -- revoke --role pauser --to 0x...   # manage AccessControl roles
 ```
