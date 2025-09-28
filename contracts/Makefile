@@ -7,26 +7,26 @@ ENV_FILE?=../.env
 
 # Run tests with a clean env so vm.setEnv in tests wins.
 test:
-	TOKEN_ADDRESS= IMPL_V2= $(FORGE) test
+	TOKEN_ADDRESS= IMPL_NEW= $(FORGE) test
 
 # Quick (quiet) run with clean env
 testq:
-	TOKEN_ADDRESS= IMPL_V2= $(FORGE) test -q
+	TOKEN_ADDRESS= IMPL_NEW= $(FORGE) test -q
 
 # Verbose run with traces and clean env
 testv:
-	TOKEN_ADDRESS= IMPL_V2= $(FORGE) test -vvv
+	TOKEN_ADDRESS= IMPL_NEW= $(FORGE) test -vvv
 
-# Run a single test by name pattern: make one TEST=test_Script_AllPaths
+# Run a single test by name pattern: make one TEST=test_Run_DeploysImplementationWhenEnvMissing
 .PHONY: one
 one:
 	@[ -n "$(TEST)" ] || (echo "Usage: make one TEST=<pattern>" && exit 1)
-	TOKEN_ADDRESS= IMPL_V2= $(FORGE) test -vvv --match-test $(TEST)
+	TOKEN_ADDRESS= IMPL_NEW= $(FORGE) test -vvv --match-test $(TEST)
 
-# Run the consolidated script test explicitly
+# Run the upgrade script tests explicitly
 .PHONY: testv-all
 testv-all:
-	TOKEN_ADDRESS= IMPL_V2= $(FORGE) test -vvv --match-test test_Script_AllPaths
+	TOKEN_ADDRESS= IMPL_NEW= $(FORGE) test -vvv --match-test test_Run_
 
 # Deploy UUPS (reads token params from env)
 .PHONY: deploy
@@ -41,9 +41,8 @@ upgrade:
 	@[ -n "$(RPC)" ] || (echo "RPC not set"; exit 1)
 	@[ -n "$(PK)" ]  || (echo "PK not set"; exit 1)
 	@[ -n "$(TOKEN_ADDRESS)" ] || (echo "TOKEN_ADDRESS not set"; exit 1)
-	@[ -n "$(IMPL_NEW)" ] || (echo "IMPL_NEW not set"; exit 1)
-	TOKEN_ADDRESS=$(TOKEN_ADDRESS) IMPL_NEW=$(IMPL_NEW) \
-	$(FORGE) script scripts/UpgradeUUPS.s.sol:UpgradeUUPS \
+	TOKEN_ADDRESS=$(TOKEN_ADDRESS)$(if $(IMPL_NEW), IMPL_NEW=$(IMPL_NEW)) \
+	  $(FORGE) script scripts/UpgradeUUPS.s.sol:UpgradeUUPS \
 	  --rpc-url $(RPC) --private-key $(PK) --broadcast -vv
 
 # Validate an upgrade (no on-chain tx)

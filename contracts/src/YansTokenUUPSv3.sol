@@ -54,14 +54,14 @@ contract YansTokenUUPSV3 is
     address from,
     address to,
     uint256 value
-  ) internal override(ERC20Upgradeable, ERC20PausableUpgradeable) {
+  ) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable) {
     super._update(from, to, value);
   }
 
   /// AccessControl supports ERC165.
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(AccessControlUpgradeable) returns (bool) {
+  ) public view virtual override(AccessControlUpgradeable) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 }

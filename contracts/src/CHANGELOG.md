@@ -63,9 +63,33 @@ Test Coverage (examples)
 - Reinitialization attempts revert (`InvalidInitialization()`).
 - Storage invariants preserved across v1→v3 upgrade.
 
+## v4 — YansTokenUUPSV4.sol
+- Builds on v3 and adds:
+  - Governance roles: `MINTER_ROLE`, `BURNER_ROLE`, `GOVERNOR_ROLE` (AccessControl-based).
+  - Supply cap managed via `_cap`, `cap()`, and `setCap` (governor-only, cannot dip below `totalSupply`).
+  - Vote checkpoints via `ERC20VotesUpgradeable`; governance is advisory (owner/Safe retains admin controls) but historical voting power is recorded.
+  - Guardian pause semantics extend to allowances, permit, and vote movement through overrides of `_update` and `_approve` (custom `TransfersPaused()` error keeps mint/burn operable while paused).
+  - Role-gated mint (`MINTER_ROLE`) and delegated burn (`burnFromAddress` restricted to `BURNER_ROLE`).
+  - Reinitializer `initializeV4(admin, minter, burner, governor, cap)` wires new modules, assigns roles, and seeds the cap.
+  - UX helper `selfDelegate()` so holders can enable voting power locally.
+- Custom errors: `CapExceeded`, `NotAuthorized`, `ZeroAddress`, `TransfersPaused`.
+- Storage layout: appends `_cap` at the end of v3 layout; no reordering of prior state.
+
+Upgrade Guidance
+- Deploy v4 implementation and upgrade via `upgradeToAndCall` with ABI-encoded `initializeV4` arguments.
+- Configure new roles immediately after upgrade and verify the cap before resuming normal operations.
+- Ensure callers operating while paused understand mint/burn remain possible but transfers/approvals (and permit) are blocked.
+
+Test Coverage (recommended additions)
+- Vote delegation/self-delegation behavior and checkpoint reads.
+- Cap boundary conditions (exact cap, cap raise/lower, revert when exceeding cap).
+- Pause interaction with permit/approve.
+- Role restrictions for mint/burnFromAddress/setCap.
+
 ## Upgrade Checklist
 - Validate proxy owner matches the signer executing the upgrade.
 - For v3, always pass `initializeV3(admin)` data in `upgradeToAndCall`.
+- For v4, upgrade with ABI-encoded `initializeV4(admin, minter, burner, governor, cap)` and confirm the cap/roles immediately.
 - Post-upgrade sanity:
   - Verify `owner()` unchanged and key state (name/symbol/decimals/totalSupply/balances) intact.
   - For v3, confirm roles (`DEFAULT_ADMIN_ROLE`, `PAUSER_ROLE`) are configured as intended.

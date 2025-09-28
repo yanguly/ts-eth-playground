@@ -13,6 +13,7 @@ The focus is on learning by doing: wallets, transactions, and simple ERC-20 cont
 - Modular TypeScript scripts using [viem](https://viem.sh/)  
 - Contracts built with [Foundry](https://book.getfoundry.sh/)
 - Upgradeable ERC‑20 (UUPS) + Foundry scripts to deploy/upgrade
+- Latest proxy version (V4): permit-enabled, pausable guardian controls, role-gated mint/burn with supply cap and on-chain vote checkpoints
 
 ---
 
@@ -45,6 +46,7 @@ npm run dev:transfer   # transfer tokens
 npm run dev:mint -- --to 0x... --amount 100   # owner-only mint (or pass --amount-wei)
   # Flags override env vars (MINT_TO / MINT_AMOUNT / MINT_AMOUNT_WEI)
 npm run dev:init-v3 -- --admin 0x...   # run once after upgrading to V3
+# V4 upgrades rely on the Foundry script to run initializeV4; set ADMIN/MINTER/BURNER/GOVERNOR/SUPPLY_CAP envs before upgrading
 npm run dev:roles -- grant --role pauser --to 0x...   # manage AccessControl roles
 npm run dev:roles -- revoke --role pauser --to 0x...   # manage AccessControl roles
 ```
@@ -106,6 +108,7 @@ Docs
 - Grant role: `npm run dev:roles -- grant --role pauser --to 0xTarget`
 - Revoke role: `npm run dev:roles -- revoke --role 0xRoleHash --to 0xTarget`
 - Supported role shorthands: `pauser`, `admin` (`default-admin`).
+- On V4 you will typically manage `MINTER_ROLE`, `BURNER_ROLE`, and `GOVERNOR_ROLE` via their 32-byte role ids.
 - Flags override env; requires `NETWORK_RPC_URL`, `PRIVATE_KEY`, `TOKEN_ADDRESS` for the token being managed.
 
 ### Upgradeable ERC-20 (UUPS)
@@ -121,15 +124,18 @@ forge script scripts/DeployUUPS.s.sol:DeployUUPS \
 # TOKEN_NAME, TOKEN_SYMBOL, INITIAL_RECIPIENT, INITIAL_SUPPLY
 ```
 
-- Upgrade proxy to V2 (uses IMPL_V2 if provided, otherwise deploys V2):
+- Upgrade proxy to V4 (deploys fresh implementation when `IMPL_NEW` is unset/invalid):
 
 ```bash
 cd contracts
 forge script scripts/UpgradeUUPS.s.sol:UpgradeUUPS \
   --rpc-url $NETWORK_RPC_URL --private-key $PRIVATE_KEY --broadcast --skip-simulation -vv
 
-# Required env: TOKEN_ADDRESS, PRIVATE_KEY
-# Optional: IMPL_NEW (impl address)
+# Required env: TOKEN_ADDRESS, PRIVATE_KEY, ADMIN_ADDRESS, MINTER_ADDRESS, BURNER_ADDRESS,
+#               GOVERNOR_ADDRESS, SUPPLY_CAP_WEI
+# Optional: IMPL_NEW (impl address override)
+# The upgrade script automatically calls `initializeV4(...)` with these values.
+# Set SUPPLY_CAP_WEI=0 when you want the cap disabled; a positive value enforces a ceiling.
 ```
 
 ## Example
@@ -157,6 +163,8 @@ npm run dev:read
 - V2 token (adds owner‑only `mint`): `contracts/src/YansTokenUUPSv2.sol`  
 - Simple token (non‑upgradeable): `contracts/src/YansToken.sol`  
 - Deploy script: `contracts/scripts/DeployUUPS.s.sol`  
+- V3 token (pausable + burnable): `contracts/src/YansTokenUUPSV3.sol`
+- V4 token (permit/votes/cap/roles): `contracts/src/YansTokenUUPSV4.sol`
 - Upgrade script: `contracts/scripts/UpgradeUUPS.s.sol`
 
 Testing (clean env helpers):

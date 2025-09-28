@@ -5,12 +5,12 @@
 - `src/YansTokenUUPSv2.sol`: V2 of the token. Adds `mint(address,uint256)` restricted to owner. Storage layout unchanged.
 - `src/YansToken.sol`: Simple non‑upgradeable ERC‑20 + Permit. Constructor mints `initialSupply * 1e18` to deployer.
 - `scripts/DeployUUPS.s.sol`: Deploys V1 impl + `ERC1967Proxy`, calls `initialize` with env params.
-- `scripts/UpgradeUUPS.s.sol`: Upgrades proxy to V2 (from `IMPL_V2` or deploys); optional post‑upgrade mint.
+- `scripts/UpgradeUUPS.s.sol`: Upgrades proxy to V4 (deploys on demand) and runs `initializeV4` with env roles/cap.
 
 ## Testing
 
 - Tests set env vars via `vm.setEnv`. Keep runtime env clean to avoid leaks from your shell `.env`.
-- The included Make targets scrub `TOKEN_ADDRESS` and `IMPL_V2` for deterministic runs.
+- The included Make targets scrub `TOKEN_ADDRESS` and `IMPL_NEW` for deterministic runs.
 
 Commands (from `contracts/`):
 - `make test`  — run tests (clean env)
@@ -20,8 +20,8 @@ Commands (from `contracts/`):
 - `make testv-all` — run each split test in isolation (separate processes)
 
 Alternatively, run directly with a scrubbed env:
-- `TOKEN_ADDRESS= IMPL_V2= forge test -vvv`
-- or temporarily unset variables: `env -u TOKEN_ADDRESS -u IMPL_V2 forge test`
+- `TOKEN_ADDRESS= IMPL_NEW= forge test -vvv`
+- or temporarily unset variables: `env -u TOKEN_ADDRESS -u IMPL_NEW forge test`
 
 ## Validating Upgrades
 
@@ -38,8 +38,12 @@ Alternatively, run directly with a scrubbed env:
 - Script: `scripts/UpgradeUUPS.s.sol:UpgradeUUPS`
 - Required env:
   - `TOKEN_ADDRESS` — proxy address (string)
-  - `PRIVATE_KEY`  — 0x-prefixed 32-byte hex (controls the upgrade)
-  - Optional: `IMPL_NEW` — implementation address; if omitted/invalid, the script deploys the latest contract
+  - `PRIVATE_KEY` — 0x-prefixed 32-byte hex (controls the upgrade)
+  - `ADMIN_ADDRESS`, `MINTER_ADDRESS`, `BURNER_ADDRESS`, `GOVERNOR_ADDRESS`
+  - `SUPPLY_CAP_WEI` — supply ceiling for new mints (use `0` to disable the cap)
+- Optional env:
+  - `IMPL_NEW` — implementation address override; if omitted/invalid, the script deploys the latest contract
+- The script issues `upgradeToAndCall` (fallbacks to `upgradeTo`) and runs `initializeV4(...)` with the supplied role/cap values.
 
 Running examples:
 - Simulate only:
@@ -50,7 +54,8 @@ Running examples:
   - `forge script scripts/UpgradeUUPS.s.sol:UpgradeUUPS --rpc-url $NETWORK_RPC_URL --private-key $PRIVATE_KEY --broadcast --skip-simulation`
 
 Tips:
-- Ensure `IMPL_NEW` (if provided) is deployed on the target network: `cast code $IMPL_NEW` should be non-empty.
+- Ensure each role address is funded/keyed as needed before upgrading (the script re-grants roles post-upgrade).
+- If you pass `IMPL_NEW`, ensure it is deployed on the target network: `cast code $IMPL_NEW` should be non-empty.
 - Owner check: signer derived from `PRIVATE_KEY` must equal `owner()` of the proxy’s implementation.
 
 ## Permit Flow (ERC‑2612)
